@@ -43,7 +43,7 @@ public class RunManager {
         return sRunManager;
     }
 
-    private PendingIntent getLocationendingIntent(boolean shouldCreate) {
+    private PendingIntent getLocationPendingIntent(boolean shouldCreate) {
         Intent broadcast = new Intent(ACTION_LOCATION);
         int flags = shouldCreate ? 0 : PendingIntent.FLAG_NO_CREATE;
         return PendingIntent.getBroadcast(mAppContext, 0, broadcast, flags);
@@ -68,7 +68,7 @@ public class RunManager {
         }
 
         // Start updates from the location manager
-        PendingIntent pi = getLocationendingIntent(true);
+        PendingIntent pi = getLocationPendingIntent(true);
         mLocationManager.requestLocationUpdates(provider, 0, 0, pi);
     }
 
@@ -80,7 +80,7 @@ public class RunManager {
     }
 
     public void stopLocationUpdates() {
-        PendingIntent pi = getLocationendingIntent(false);
+        PendingIntent pi = getLocationPendingIntent(false);
         if (pi != null) {
             mLocationManager.removeUpdates(pi);
             pi.cancel();
@@ -88,7 +88,18 @@ public class RunManager {
     }
 
     public boolean isTrackingRun() {
-        return getLocationendingIntent(false) != null;
+        return getLocationPendingIntent(false) != null;
+    }
+
+    public Location getLastLocationForRun(long runId) {
+        Location location = null;
+        RunDatabaseHelper.LocationCursor cursor = mHelper.queryLastLocationForRun(runId);
+        cursor.moveToFirst();
+        // If you got a row, get a Location
+        if (!cursor.isAfterLast())
+            location = cursor.getLocation();
+        cursor.close();
+        return location;
     }
 
     public Run startNewRun() {
@@ -119,6 +130,22 @@ public class RunManager {
         run.setId(mHelper.insertRun(run));
         return run;
     }
+
+    public RunDatabaseHelper.RunCursor queryRuns() {
+        return mHelper.queryRuns();
+    }
+
+    public Run getRun(long id) {
+        Run run = null;
+        RunDatabaseHelper.RunCursor cursor = mHelper.queryRun(id);
+        cursor.moveToFirst();
+        // If you got a row, get a run
+        if (!cursor.isAfterLast())
+            run = cursor.getRun();
+        cursor.close();
+        return run;
+    }
+
 
     public void insertLocation(Location loc) {
         if (mCurrentRunId != -1) {
