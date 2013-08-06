@@ -24,8 +24,7 @@ public class RunFragment extends Fragment {
 
         @Override
         protected void onLocationReceived(Context context, Location loc) {
-//            if (!mRunManager.isTrackingRun(mRun)) // wanted but not existent
-            if (!mRunManager.isTrackingRun())
+            if (!mRunManager.isTrackingRun(mRun))
                 return;
             mLastLocation = loc;
             if (isVisible())
@@ -123,8 +122,7 @@ public class RunFragment extends Fragment {
 
     private void updateUI() {
         boolean started = mRunManager.isTrackingRun();
-//        boolean trackingThisRun = mRunManager.isTrackingRun(mRun); // wanted, but not existent
-        boolean trackingThisRun = mRunManager.isTrackingRun();
+        boolean trackingThisRun = mRunManager.isTrackingRun(mRun);
 
         if (mRun != null) {
             mStartedTextView.setText(mRun.getStartDate().toString());

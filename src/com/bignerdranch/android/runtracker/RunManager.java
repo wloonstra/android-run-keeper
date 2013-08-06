@@ -91,6 +91,10 @@ public class RunManager {
         return getLocationPendingIntent(false) != null;
     }
 
+    public boolean isTrackingRun(Run run) {
+        return run != null && run.getId() == mCurrentRunId;
+    }
+
     public Location getLastLocationForRun(long runId) {
         Location location = null;
         RunDatabaseHelper.LocationCursor cursor = mHelper.queryLastLocationForRun(runId);
