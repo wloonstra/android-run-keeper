@@ -6,6 +6,8 @@ import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,12 +15,11 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
-
 public class RunFragment extends Fragment {
 
     private static final String TAG = "RunFragment";
     private static final String ARG_RUN_ID = "RUN_ID";
+    private static final int LOAD_RUN = 0;
 
     private BroadcastReceiver mLocationReceiver = new LocationReceiver() {
 
@@ -65,7 +66,9 @@ public class RunFragment extends Fragment {
         if (args != null) {
             long runId = args.getLong(ARG_RUN_ID, -1);
             if (runId != -1) {
-                mRun = mRunManager.getRun(runId);
+                LoaderManager lm = getLoaderManager();
+                lm.initLoader(LOAD_RUN, args, new RunLoaderCallbacks());
+
                 mLastLocation = mRunManager.getLastLocationForRun(runId);
             }
         }
@@ -139,5 +142,23 @@ public class RunFragment extends Fragment {
 
         mStartButton.setEnabled(!started);
         mStopButton.setEnabled(started && trackingThisRun);
+    }
+
+    private class RunLoaderCallbacks implements LoaderManager.LoaderCallbacks<Run> {
+        @Override
+        public Loader<Run> onCreateLoader(int i, Bundle bundle) {
+            return new RunLoader(getActivity(), bundle.getLong(ARG_RUN_ID));
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Run> runLoader, Run run) {
+            mRun = run;
+            updateUI();
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Run> runLoader) {
+            // Do nothing
+        }
     }
 }
